@@ -1,6 +1,7 @@
 # coding: utf8
 import base64
 import os
+import passlib.context
 import pytest
 import sqlalchemy
 import ws.nginxdbauth.web
@@ -25,6 +26,8 @@ def config(monkeypatch):
     def inner(config):
         monkeypatch.setattr('ws.nginxdbauth.web.ConfigParser.get',
                             lambda self, s, x: config.get(x))
+        monkeypatch.setattr('ws.nginxdbauth.web.ConfigParser.has_option',
+                            lambda self, s, x: x in config)
     return inner
 
 
@@ -71,4 +74,16 @@ def test_handles_non_ascii_entries(config, database):
             'username = :username AND password = :password'})
     b = ws.nginxdbauth.web.app.test_client()
     r = b.get('/', headers=basic_auth(u'ümläut', 'asdf'))
+    assert r.status_code == 200, r.data.decode('ascii')
+
+
+def test_password_hashing_with_passlib(config, database):
+    pwd_context = passlib.context.CryptContext(schemes=['sha256_crypt'])
+    database.execute('INSERT INTO users VALUES (3, "foo", :pw, "")',
+                     pw=pwd_context.hash('secret'))
+    config({'dsn': database.url,
+            'query': 'SELECT password FROM users WHERE username = :username',
+            'password_hash': 'sha256_crypt'})
+    b = ws.nginxdbauth.web.app.test_client()
+    r = b.get('/', headers=basic_auth('foo', 'secret'))
     assert r.status_code == 200, r.data.decode('ascii')

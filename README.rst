@@ -19,8 +19,9 @@ Configure database access
 You'll need to provide the DSN and the query using a configuration file::
 
     [default]
-    dsn = sqlite:///path/to/auth.db
-    query = SELECT id FROM users WHERE username = :username AND password = :password AND role = :x_required_role
+    dsn = postgresql://localhost/myusers
+    query = SELECT password FROM users WHERE username = :username AND password = :password AND role = :x_required_role
+    password_hash = bcrypt
 
 See the `sqlalchemy documentation`_ for supported DSNs. Note that you have to
 install the respective driver python package (``mysql-python``, ``psycopg2``,
@@ -33,6 +34,15 @@ The query gets passed as SQL parameters the basic auth ``username`` and
 with ``_``). (If that is not flexible enough for your usecase, you'll have to
 run separate instances with specialized queries, for the time being).
 
+The query must return the hashed password of the user. Since for simple cases
+you might get away with using the SQL functions provided by your database to
+hash the password (e.g. mysql ``WHERE password=encrypt(:password, password)``),
+but you can also specify any hash supported by `passlib`_ as the
+``password_hash`` to perform the comparison in Python (that's why we need the
+stored password hash from the database). You need to ``pip install passlib``
+to use this feature.
+
+.. _`passlib`: https://passlib.readthedocs.io/en/stable/narr/quickstart.html
 
 
 Set up HTTP service

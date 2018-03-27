@@ -19,7 +19,8 @@ app = Flask(__name__)
 def auth_view():
     config = ConfigParser()
     config.read(os.path.expanduser(os.environ['NGINXDBAUTH_CONFIG']))
-    get = lambda x: config.get('default', x)  # noqa
+    get = (lambda x: config.get('default', x)
+           if config.has_option('default', x) else None)  # noqa
     db = sqlalchemy.create_engine(get('dsn'))
     params = {
         'username': request.authorization.username,
@@ -31,10 +32,21 @@ def auth_view():
             params[key] = value.decode('latin1')
     for key, value in request.headers:
         params[key.lower().replace('-', '_')] = value
-    found = len(db.execute(sqlalchemy.text(get('query')), **params).fetchall())
-    if found == 1:
+
+    verified = False
+    result = db.execute(sqlalchemy.text(get('query')), **params).fetchall()
+    if len(result) == 1:
+        hashing = get('password_hash')
+        if hashing:
+            import passlib  # soft dependency
+            pwd_context = passlib.context.CryptContext(schemes=[hashing])
+            verified = pwd_context.verify(params['password'], result[0][0])
+        else:
+            verified = True
+    if verified:
         return 'OK', 200
-    return 'FAIL', 403
+    else:
+        return 'FAIL', 403
 
 
 @app.errorhandler(Exception)
