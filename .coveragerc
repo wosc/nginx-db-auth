@@ -1,0 +1,10 @@
+[run]
+branch = True
+source = ws.nginxdbauth
+
+[report]
+precision = 2
+omit = */tests/*
+
+[html]
+directory = coverage-report
