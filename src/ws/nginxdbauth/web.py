@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
 import argparse
 import logging
 import os
@@ -20,6 +20,12 @@ LOG_FORMAT = '%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s'
 
 @app.route('/')
 def auth_view():
+    if not request.authorization:
+        response = make_response('AUTHENTICATE', 401)
+        if 'WWW-Authenticate' in request.headers:
+            response.headers['WWW-Authenticate'] = request.headers[
+                'WWW-Authenticate']
+        return response
     config = ConfigParser()
     config.read(os.path.expanduser(os.environ['NGINXDBAUTH_CONFIG']))
     get = (lambda x: config.get('default', x)

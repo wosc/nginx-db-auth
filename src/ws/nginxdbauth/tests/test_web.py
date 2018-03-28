@@ -87,3 +87,12 @@ def test_password_hashing_with_passlib(config, database):
     b = ws.nginxdbauth.web.app.test_client()
     r = b.get('/', headers=basic_auth('foo', 'secret'))
     assert r.status_code == 200, r.data.decode('ascii')
+
+
+def test_no_auth_header_returns_401(config):
+    b = ws.nginxdbauth.web.app.test_client()
+    r = b.get('/')
+    assert r.status_code == 401, r.data.encode('ascii')
+    r = b.get('/', headers={'WWW-Authenticate': 'my realm'})
+    assert r.status_code == 401, r.data.encode('ascii')
+    assert r.headers['WWW-Authenticate'] == 'my realm'

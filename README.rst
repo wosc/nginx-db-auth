@@ -78,5 +78,8 @@ Now you can set up a protected nginx location like this::
             proxy_pass_request_body off;
             proxy_set_header Content-Length "";
             proxy_set_header X-Required-Role "superuser";
+            proxy_set_header WWW-Authenticate "my realm";
         }
 
+The ``WWW-Authenticate`` header sent by nginx will simply be echoed back on 401
+requests (since as far as I can tell, nginx does not provide another way to set the realm string in the ``auth_request`` case).
