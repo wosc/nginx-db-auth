@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-1.0.2 (unreleased)
+1.0.2 (2018-03-28)
 ------------------
 
 - Echo back the WWW-Authenticate header for 401 responses.
