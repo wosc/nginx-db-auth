@@ -59,6 +59,7 @@ Here's an example apache configuration snippet to do this::
     <Location /nginx-auth>
       SetEnv NGINXDBAUTH_CONFIG /path/to/config
       CGIPassAuth On  # apache >= 2.4.13
+      # SetEnv NGINXDBAUTH_LOGFILE /path/to/log  # optional, for debugging
     </Location>
 
 

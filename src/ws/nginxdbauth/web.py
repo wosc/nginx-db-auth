@@ -1,5 +1,6 @@
 from flask import Flask, request
 import argparse
+import logging
 import os
 import os.path
 import sqlalchemy
@@ -13,6 +14,8 @@ except ImportError:
     from configparser import ConfigParser
 
 app = Flask(__name__)
+log = logging.getLogger(__name__)
+LOG_FORMAT = '%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s'
 
 
 @app.route('/')
@@ -51,12 +54,16 @@ def auth_view():
 
 @app.errorhandler(Exception)
 def handle_error(error):
+    log.error('An error occured', exc_info=True)
     return str(error), 500
 
 
 def cgi():
     # We only have the one route
     os.environ['PATH_INFO'] = '/'
+    logfile = os.environ.get('NGINXDBAUTH_LOGFILE')
+    if logfile:
+        logging.basicConfig(filename=logfile, format=LOG_FORMAT)
     wsgiref.handlers.CGIHandler().run(app.wsgi_app)
 
 
@@ -68,5 +75,6 @@ def serve():
     options = parser.parse_args()
     if options.config:  # auth_view will raise KeyError to signal missing param
         os.environ['NGINXDBAUTH_CONFIG'] = options.config
+    logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT)
     wsgiref.simple_server.make_server(
         options.host, options.port, app.wsgi_app).serve_forever()

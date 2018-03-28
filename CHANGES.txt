@@ -4,7 +4,7 @@ CHANGES
 1.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Enable logging errors to a file for debugging the CGI script.
 
 
 1.0.0 (2018-03-27)
