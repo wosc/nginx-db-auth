@@ -58,6 +58,7 @@ Here's an example apache configuration snippet to do this::
     ScriptAlias /nginx-auth /path/to/nginxdbauth/nginx-db-auth-cgi
     <Location /nginx-auth>
       SetEnv NGINXDBAUTH_CONFIG /path/to/config
+      CGIPassAuth On  # apache >= 2.4.13
     </Location>
 
 
