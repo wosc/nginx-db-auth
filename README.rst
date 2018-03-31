@@ -2,6 +2,9 @@
 nginx basic authentication against a database
 =============================================
 
+.. image:: https://travis-ci.org/wosc/nginx-db-auth.png
+   :target: https://travis-ci.org/wosc/nginx-db-auth
+
 This packages answers an `nginx auth subrequest`_ by looking up the
 user/password in a database (mysql, postgresql, whatever `sqlalchemy`_
 supports).
@@ -78,7 +81,7 @@ Now you can set up a protected nginx location like this::
             proxy_pass_request_body off;
             proxy_set_header Content-Length "";
             proxy_set_header X-Required-Role "superuser";
-            proxy_set_header WWW-Authenticate "my realm";
+            proxy_set_header WWW-Authenticate "Basic realm=\"my realm\"";
         }
 
 The ``WWW-Authenticate`` header sent by nginx will simply be echoed back on 401
