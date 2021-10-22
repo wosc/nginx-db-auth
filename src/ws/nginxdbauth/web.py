@@ -47,7 +47,7 @@ def auth_view():
     if len(result) == 1:
         hashing = get('password_hash')
         if hashing:
-            import passlib  # soft dependency
+            import passlib.context  # soft dependency
             pwd_context = passlib.context.CryptContext(schemes=[hashing])
             verified = pwd_context.verify(params['password'], result[0][0])
         else:
