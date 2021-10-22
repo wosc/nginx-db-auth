@@ -23,7 +23,7 @@ You'll need to provide the DSN and the query using a configuration file::
 
     [default]
     dsn = postgresql://localhost/myusers
-    query = SELECT password FROM users WHERE username = :username AND password = :password AND role = :x_required_role
+    query = SELECT password FROM users WHERE username = :username AND role = :x_required_role
     password_hash = bcrypt
 
 See the `sqlalchemy documentation`_ for supported DSNs. Note that you have to
