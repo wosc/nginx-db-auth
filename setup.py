@@ -6,7 +6,7 @@ import glob
 
 setup(
     name='ws.nginxdbauth',
-    version='1.0.3.dev0',
+    version='1.0.3',
 
     install_requires=[
         'flask',
