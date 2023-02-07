@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-1.0.4 (unreleased)
+1.0.4 (2023-02-07)
 ------------------
 
 - Update to sqlalchemy-2
