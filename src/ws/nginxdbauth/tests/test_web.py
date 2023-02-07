@@ -1,4 +1,5 @@
 # coding: utf8
+from sqlalchemy import text
 import base64
 import os
 import passlib.context
@@ -10,13 +11,18 @@ import ws.nginxdbauth.web
 @pytest.fixture
 def database(tmpdir):
     db = sqlalchemy.create_engine('sqlite:////%s' % tmpdir.join('auth.db'))
-    db.execute(
+    conn = db.connect()
+    conn.execute(text(
         'CREATE TABLE users ('
         'id integer, username varchar(40), password varchar(40), '
-        'role varchar(40))')
-    db.execute('INSERT INTO users VALUES (1, "normal", "asdf", "normal")')
-    db.execute('INSERT INTO users VALUES (2, "super", "qwer", "super")')
-    return db
+        'role varchar(40))'))
+    conn.execute(
+        text('INSERT INTO users VALUES (1, "normal", "asdf", "normal")'))
+    conn.execute(
+        text('INSERT INTO users VALUES (2, "super", "qwer", "super")'))
+    conn.commit()
+    conn.url = db.url
+    return conn
 
 
 @pytest.fixture
@@ -69,7 +75,9 @@ def test_headers_are_available_as_query_parameters(config, database):
 
 
 def test_handles_non_ascii_entries(config, database):
-    database.execute(u'INSERT INTO users VALUES (3, "ümläut", "asdf", "")')
+    database.execute(text(
+        u'INSERT INTO users VALUES (3, "ümläut", "asdf", "")'))
+    database.commit()
     config({'dsn': database.url, 'query': 'SELECT id FROM users WHERE '
             'username = :username AND password = :password'})
     b = ws.nginxdbauth.web.app.test_client()
@@ -79,8 +87,9 @@ def test_handles_non_ascii_entries(config, database):
 
 def test_password_hashing_with_passlib(config, database):
     pwd_context = passlib.context.CryptContext(schemes=['sha256_crypt'])
-    database.execute('INSERT INTO users VALUES (3, "foo", :pw, "")',
-                     pw=pwd_context.hash('secret'))
+    database.execute(text('INSERT INTO users VALUES (3, "foo", :pw, "")'),
+                     dict(pw=pwd_context.hash('secret')))
+    database.commit()
     config({'dsn': database.url,
             'query': 'SELECT password FROM users WHERE username = :username',
             'password_hash': 'sha256_crypt'})

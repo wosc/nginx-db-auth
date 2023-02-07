@@ -11,7 +11,7 @@ setup(
     install_requires=[
         'flask',
         'setuptools',
-        'sqlalchemy',
+        'sqlalchemy>=2.0.0',
     ],
 
     extras_require={'test': [

@@ -30,7 +30,7 @@ def auth_view():
     config.read(os.path.expanduser(os.environ['NGINXDBAUTH_CONFIG']))
     get = (lambda x: config.get('default', x)
            if config.has_option('default', x) else None)  # noqa
-    db = sqlalchemy.create_engine(get('dsn'))
+    db = sqlalchemy.create_engine(get('dsn')).connect()
     params = {
         'username': request.authorization.username,
         'password': request.authorization.password,
@@ -43,7 +43,7 @@ def auth_view():
         params[key.lower().replace('-', '_')] = value
 
     verified = False
-    result = db.execute(sqlalchemy.text(get('query')), **params).fetchall()
+    result = db.execute(sqlalchemy.text(get('query')), params).fetchall()
     if len(result) == 1:
         hashing = get('password_hash')
         if hashing:
