@@ -1,5 +1,6 @@
-"""Authenticate an nginx request against an SQL database
-"""
+"""Authenticate an nginx request against an SQL database."""
+# -*- coding: utf-8 -*-
+
 from setuptools import setup, find_packages
 import glob
 
@@ -12,11 +13,15 @@ setup(
         'flask',
         'setuptools',
         'sqlalchemy>=2.0.0',
+        'Flask-SQLAlchemy',
     ],
 
-    extras_require={'test': [
-        'pytest',
-    ]},
+    extras_require={
+        'test': [
+            'passlib',
+            'pytest-cov',
+        ],
+    },
 
     entry_points={
         'console_scripts': [
