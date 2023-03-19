@@ -27,7 +27,7 @@ setup(
 
     author='Wolfgang Schnerring <wosc@wosc.de>',
     author_email='wosc@wosc.de',
-    license='ZPL 2.1',
+    license='BSD-3-Clause',
     url='https://github.com/wosc/nginx-db-auth',
 
     description=__doc__.strip(),
