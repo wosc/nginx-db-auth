@@ -30,10 +30,10 @@ def config(monkeypatch):
     os.environ['NGINXDBAUTH_CONFIG'] = '/dev/null'
 
     def inner(config):
-        monkeypatch.setattr('ws.nginxdbauth.web.ConfigParser.get',
-                            lambda self, s, x: config.get(x))
-        monkeypatch.setattr('ws.nginxdbauth.web.ConfigParser.has_option',
-                            lambda self, s, x: x in config)
+        monkeypatch.setattr('ws.nginxdbauth.web.ConfigParser.has_section',
+                            lambda self, s: True)
+        monkeypatch.setattr('ws.nginxdbauth.web.ConfigParser.items',
+                            lambda self, s: config.items())
     return inner
 
 

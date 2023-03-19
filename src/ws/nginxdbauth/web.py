@@ -22,11 +22,15 @@ def auth_view():
             response.headers['WWW-Authenticate'] = request.headers[
                 'WWW-Authenticate']
         return response
+
     config = ConfigParser()
     config.read(os.path.expanduser(os.environ['NGINXDBAUTH_CONFIG']))
-    get = (lambda x: config.get('default', x)
-           if config.has_option('default', x) else None)  # noqa
-    db = sqlalchemy.create_engine(get('dsn')).connect()
+    if config.has_section('default'):
+        config = dict(config.items('default'))
+    else:
+        config = {}
+
+    db = sqlalchemy.create_engine(config.get('dsn')).connect()
     params = {
         'username': request.authorization.username,
         'password': request.authorization.password,
@@ -35,9 +39,9 @@ def auth_view():
         params[key.lower().replace('-', '_')] = value
 
     verified = False
-    result = db.execute(sqlalchemy.text(get('query')), params).fetchall()
+    result = db.execute(sqlalchemy.text(config.get('query')), params).fetchall()
     if len(result) == 1:
-        hashing = get('password_hash')
+        hashing = config.get('password_hash')
         if hashing:
             import passlib.context  # soft dependency
             pwd_context = passlib.context.CryptContext(schemes=[hashing])
