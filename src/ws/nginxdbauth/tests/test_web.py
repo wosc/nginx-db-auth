@@ -27,6 +27,7 @@ def database(tmpdir):
 
 @pytest.fixture
 def config(monkeypatch):
+    ws.nginxdbauth.web.CONFIG.clear()
     os.environ['NGINXDBAUTH_CONFIG'] = '/dev/null'
 
     def inner(config):

@@ -12,6 +12,15 @@ import wsgiref.simple_server
 app = Flask(__name__)
 log = logging.getLogger(__name__)
 LOG_FORMAT = '%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s'
+CONFIG = {}
+
+
+def parse_config(filename):
+    CONFIG['parsed'] = True
+    config = ConfigParser()
+    config.read(os.path.expanduser(filename))
+    if config.has_section('default'):
+        CONFIG.update(config.items('default'))
 
 
 @app.route('/')
@@ -23,14 +32,10 @@ def auth_view():
                 'WWW-Authenticate']
         return response
 
-    config = ConfigParser()
-    config.read(os.path.expanduser(os.environ['NGINXDBAUTH_CONFIG']))
-    if config.has_section('default'):
-        config = dict(config.items('default'))
-    else:
-        config = {}
+    if not CONFIG.get('parsed'):
+        parse_config(os.environ['NGINXDBAUTH_CONFIG'])
 
-    db = sqlalchemy.create_engine(config.get('dsn')).connect()
+    db = sqlalchemy.create_engine(CONFIG.get('dsn')).connect()
     params = {
         'username': request.authorization.username,
         'password': request.authorization.password,
@@ -39,9 +44,9 @@ def auth_view():
         params[key.lower().replace('-', '_')] = value
 
     verified = False
-    result = db.execute(sqlalchemy.text(config.get('query')), params).fetchall()
+    result = db.execute(sqlalchemy.text(CONFIG.get('query')), params).fetchall()
     if len(result) == 1:
-        hashing = config.get('password_hash')
+        hashing = CONFIG.get('password_hash')
         if hashing:
             import passlib.context  # soft dependency
             pwd_context = passlib.context.CryptContext(schemes=[hashing])
@@ -73,10 +78,12 @@ def serve():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='localhost', help='bind host')
     parser.add_argument('--port', default='8899', help='bind port', type=int)
-    parser.add_argument('--config', help='path to config file')
+    parser.add_argument('--config', help='path to config file (required)')
     options = parser.parse_args()
-    if options.config:  # auth_view will raise KeyError to signal missing param
-        os.environ['NGINXDBAUTH_CONFIG'] = options.config
+    if not options.config:
+        parser.print_usage()
+        sys.exit(1)
+    parse_config(options.config)
     logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT)
     wsgiref.simple_server.make_server(
         options.host, options.port, app.wsgi_app).serve_forever()
