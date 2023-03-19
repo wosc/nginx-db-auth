@@ -15,6 +15,7 @@ optional-dependencies = {test=[
 authors = [{name="Wolfgang Schnerring", email="wosc@wosc.de"}]
 license = {text=" BSD-3-Clause"}
 urls = {Repository="https://github.com/wosc/nginx-db-auth"}
+requires-python = ">=3.7"
 
 dynamic = ["version", "readme"]
 
