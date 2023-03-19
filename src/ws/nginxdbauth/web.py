@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from flask import Flask, request, make_response
 import argparse
 import logging
@@ -7,11 +8,6 @@ import sqlalchemy
 import sys
 import wsgiref.handlers
 import wsgiref.simple_server
-
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
 
 app = Flask(__name__)
 log = logging.getLogger(__name__)
@@ -35,10 +31,6 @@ def auth_view():
         'username': request.authorization.username,
         'password': request.authorization.password,
     }
-    if sys.version_info < (3,):
-        # XXX Werkzeug bug, authorization properties should be unicode already.
-        for key, value in list(params.items()):
-            params[key] = value.decode('latin1')
     for key, value in request.headers:
         params[key.lower().replace('-', '_')] = value
 

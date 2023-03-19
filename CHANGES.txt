@@ -1,10 +1,10 @@
 CHANGES
 =======
 
-1.0.5 (unreleased)
+1.1.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Drop Python-2 support
 
 
 1.0.4 (2023-02-07)

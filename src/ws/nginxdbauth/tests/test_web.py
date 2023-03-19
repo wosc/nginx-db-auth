@@ -39,7 +39,7 @@ def config(monkeypatch):
 
 def basic_auth(username, password):
     return {'Authorization': 'Basic '.encode('ascii') + base64.b64encode(
-        u':'.join([username, password]).encode('latin1'))}
+        ':'.join([username, password]).encode('latin1'))}
 
 
 def test_correct_password_returns_200(config, database):
@@ -76,12 +76,12 @@ def test_headers_are_available_as_query_parameters(config, database):
 
 def test_handles_non_ascii_entries(config, database):
     database.execute(text(
-        u'INSERT INTO users VALUES (3, "ümläut", "asdf", "")'))
+        'INSERT INTO users VALUES (3, "ümläut", "asdf", "")'))
     database.commit()
     config({'dsn': database.url, 'query': 'SELECT id FROM users WHERE '
             'username = :username AND password = :password'})
     b = ws.nginxdbauth.web.app.test_client()
-    r = b.get('/', headers=basic_auth(u'ümläut', 'asdf'))
+    r = b.get('/', headers=basic_auth('ümläut', 'asdf'))
     assert r.status_code == 200, r.data.decode('ascii')
 
 
