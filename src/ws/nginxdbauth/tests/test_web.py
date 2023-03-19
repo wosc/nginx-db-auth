@@ -39,7 +39,7 @@ def config(monkeypatch):
 
 def basic_auth(username, password):
     return {'Authorization': 'Basic '.encode('ascii') + base64.b64encode(
-        ':'.join([username, password]).encode('latin1'))}
+        ':'.join([username, password]).encode('utf-8'))}
 
 
 def test_correct_password_returns_200(config, database):
