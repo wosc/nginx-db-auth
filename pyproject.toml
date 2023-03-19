@@ -30,6 +30,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ws"]  # required for pep420 namespace package, pypa/hatch#587
+strict-naming = false  # required for proper output filename
+[tool.hatch.build.targets.sdist]
+strict-naming = false  # required for proper output filename
 
 [tool.hatch.version]
 path = "src/ws/nginxdbauth/__init__.py"
