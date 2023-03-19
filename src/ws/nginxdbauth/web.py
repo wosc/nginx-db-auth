@@ -35,7 +35,11 @@ def auth_view():
     if not CONFIG.get('parsed'):
         parse_config(os.environ['NGINXDBAUTH_CONFIG'])
 
-    db = sqlalchemy.create_engine(CONFIG.get('dsn')).connect()
+    sa_options = {
+        key.replace('sqlalchemy.', '', 1): value
+        for key, value in CONFIG.items() if key.startswith('sqlalchemy.')}
+    db = sqlalchemy.create_engine(CONFIG['dsn'], **sa_options).connect()
+
     params = {
         'username': request.authorization.username,
         'password': request.authorization.password,

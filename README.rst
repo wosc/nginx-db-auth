@@ -32,6 +32,8 @@ etc.) yourself.
 
 .. _`sqlalchemy documentation`: http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
 
+Settings beginning with ``sqlalchemy.`` are stripped of that prefix and passed through to `sqlalchemy.create_engine() <https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine>`_.
+
 The query gets passed as SQL parameters the basic auth ``username`` and
 ``password`` as well as any request headers (lowercase, and ``-`` replaced
 with ``_``). (If that is not flexible enough for your usecase, you'll have to
