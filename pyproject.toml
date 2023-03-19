@@ -36,14 +36,32 @@ content-type = "text/x-rst"
 fragments = [{path="README.rst"}, {text="\n\n"}, {path="CHANGES.txt"}]
 
 
-[tool.hatch.envs.test]
-features = ["test"]
+[tool.hatch.envs.default]
 # Make work on older OS
 python = "3"
 dependencies = ["pip>=23"]
 
-[tool.hatch.envs.test.scripts]
-run = "pytest"
+
+[tool.hatch.envs.test]
+features = ["test"]
 
 [tool.pytest.ini_options]
 addopts = "--tb=native --cov=src --cov-report=html"
+
+
+[tool.hatch.envs.release]
+skip-install = true
+dependencies = ["towncrier"]
+
+[tool.towncrier]
+directory = "changelog/"
+filename = "CHANGES.txt"
+title_format = ""  # changelog file already has a title
+# First underline is used for version/date header.
+# Second underline is used for the type names (like 'Bug fixes:').
+underlines = ["-", "+"]
+
+[[tool.towncrier.type]]
+directory = "change"
+name = "Changes"  # I'd love to omit the category, but that requires copy&paste of the whole template
+showcontent = true
