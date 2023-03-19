@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from flask import Flask, request, make_response
+from sqlalchemy.orm import Session
 import argparse
 import logging
 import os
@@ -10,9 +11,12 @@ import wsgiref.handlers
 import wsgiref.simple_server
 
 app = Flask(__name__)
+
 log = logging.getLogger(__name__)
 LOG_FORMAT = '%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s'
+
 CONFIG = {}
+DB = None
 
 
 def parse_config(filename):
@@ -21,6 +25,18 @@ def parse_config(filename):
     config.read(os.path.expanduser(filename))
     if config.has_section('default'):
         CONFIG.update(config.items('default'))
+    return CONFIG
+
+
+def setup_db(config):
+    global DB
+    if DB is not None:
+        return
+
+    sa_options = {
+        key.replace('sqlalchemy.', '', 1): value
+        for key, value in config.items() if key.startswith('sqlalchemy.')}
+    DB = sqlalchemy.create_engine(config['dsn'], **sa_options)
 
 
 @app.route('/')
@@ -34,11 +50,7 @@ def auth_view():
 
     if not CONFIG.get('parsed'):
         parse_config(os.environ['NGINXDBAUTH_CONFIG'])
-
-    sa_options = {
-        key.replace('sqlalchemy.', '', 1): value
-        for key, value in CONFIG.items() if key.startswith('sqlalchemy.')}
-    db = sqlalchemy.create_engine(CONFIG['dsn'], **sa_options).connect()
+    setup_db(CONFIG)
 
     params = {
         'username': request.authorization.username,
@@ -48,7 +60,9 @@ def auth_view():
         params[key.lower().replace('-', '_')] = value
 
     verified = False
-    result = db.execute(sqlalchemy.text(CONFIG.get('query')), params).fetchall()
+    with Session(DB) as db:
+        result = db.execute(
+            sqlalchemy.text(CONFIG['query']), params).fetchall()
     if len(result) == 1:
         hashing = CONFIG.get('password_hash')
         if hashing:
@@ -87,7 +101,8 @@ def serve():
     if not options.config:
         parser.print_usage()
         sys.exit(1)
-    parse_config(options.config)
     logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT)
+    config = parse_config(options.config)
+    setup_db(config)
     wsgiref.simple_server.make_server(
         options.host, options.port, app.wsgi_app).serve_forever()

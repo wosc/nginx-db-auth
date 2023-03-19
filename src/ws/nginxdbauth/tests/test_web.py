@@ -10,6 +10,10 @@ import ws.nginxdbauth.web
 
 @pytest.fixture
 def database(tmpdir):
+    if ws.nginxdbauth.web.DB is not None:
+        ws.nginxdbauth.web.DB.dispose()
+        ws.nginxdbauth.web.DB = None
+
     db = sqlalchemy.create_engine('sqlite:////%s' % tmpdir.join('auth.db'))
     conn = db.connect()
     conn.execute(text(

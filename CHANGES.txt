@@ -4,9 +4,11 @@ CHANGES
 1.1.0 (unreleased)
 ------------------
 
-- Drop Python-2 support
-
 - Make sqlalchemy options configurable
+
+- Connect to database once on startup, not for each request
+
+- Drop Python-2 support
 
 
 1.0.4 (2023-02-07)
