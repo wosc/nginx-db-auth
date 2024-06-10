@@ -102,6 +102,8 @@ def serve():
         parser.print_usage()
         sys.exit(1)
     logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT)
+    # Work around pyca/bcrypt#684
+    logging.getLogger('passlib').setLevel(logging.ERROR)
     config = parse_config(options.config)
     setup_db(config)
     wsgiref.simple_server.make_server(
