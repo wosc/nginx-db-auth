@@ -33,6 +33,8 @@ etc.) yourself.
 .. _`sqlalchemy documentation`: http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
 
 Settings beginning with ``sqlalchemy.`` are stripped of that prefix and passed through to `sqlalchemy.create_engine() <https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine>`_.
+Settings ending in `__literal__` are stripped of that suffixed and passed through `ast.literal_eval()`,
+for example `sqlalchemy.pool_recycle__literal__=3600` calls `create_engine(dsn, pool_recycle=3600)` (and not `'3600'`).
 
 The query gets passed as SQL parameters the basic auth ``username`` and
 ``password`` as well as any request headers (lowercase, and ``-`` replaced

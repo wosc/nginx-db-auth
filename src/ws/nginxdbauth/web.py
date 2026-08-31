@@ -1,3 +1,4 @@
+from ast import literal_eval
 from configparser import ConfigParser
 from flask import Flask, request, make_response
 from sqlalchemy.orm import Session
@@ -33,9 +34,15 @@ def setup_db(config):
     if DB is not None:
         return
 
-    sa_options = {
-        key.replace('sqlalchemy.', '', 1): value
-        for key, value in config.items() if key.startswith('sqlalchemy.')}
+    sa_options = {}
+    for key, value in config.items():
+        if not key.startswith('sqlalchemy.'):
+            continue
+        key = key.replace('sqlalchemy.', '', 1)
+        if key.endswith('__literal__'):
+            key = key.replace('__literal__', '', 1)
+            value = literal_eval(value)
+        sa_options[key] = value
     DB = sqlalchemy.create_engine(config['dsn'], **sa_options)
 
 
