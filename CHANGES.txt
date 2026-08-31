@@ -3,6 +3,15 @@ CHANGES
 
 .. towncrier release notes start
 
+ws.nginxdbauth 1.2.0 (2026-08-31)
+---------------------------------
+
+Changes
++++++++
+
+- Support non-str values for sqlalchemy configuration (literal)
+
+
 1.1.1 (2024-06-10)
 ------------------
 
